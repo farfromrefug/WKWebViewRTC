@@ -12,6 +12,8 @@ import AVFoundation
 import WebRTC
 import WebKit
 
+@objc(WKWebViewRTC)
+@objcMembers
 public class WKWebViewRTC : NSObject {
 	// RTCPeerConnectionFactory single instance.
 	var rtcPeerConnectionFactory: RTCPeerConnectionFactory!
