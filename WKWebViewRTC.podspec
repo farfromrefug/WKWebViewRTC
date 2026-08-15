@@ -26,13 +26,17 @@ Pod::Spec.new do |s|
   s.author           = { 'OpenTelecom' => 'contact@OpenTele.com' }
   s.source           = { :git => 'https://github.com/OpenTelecom/WKWebViewRTC.git', :tag => s.version.to_s }
 
-	s.swift_version = '4.2'
-  s.ios.deployment_target = '11.0'
+	s.swift_version = '5.0'
+  s.ios.deployment_target = '12.0'
 
   s.source_files = 'WKWebViewRTC/Classes/**/*'
 	s.resources = 'WKWebViewRTC/Js/jsWKWebViewRTC.js'
 
-   s.dependency 'GoogleWebRTC', '1.1.29229'
+   # GoogleWebRTC is abandoned (last release 2019) and ships no arm64 simulator
+   # slice, which breaks every simulator build on Apple Silicon. WebRTC-lib is
+   # the community distribution of the official WebRTC binaries as an
+   # xcframework, with an ios-arm64_x86_64-simulator slice.
+   s.dependency 'WebRTC-lib', '~> 151.0'
 
-   s.xcconfig       = { 'ENABLE_BITCODE' => 'NO', 'ONLY_ACTIVE_ARCH' => 'Yes' }
+   s.xcconfig       = { 'ENABLE_BITCODE' => 'NO' }
 end

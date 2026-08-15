@@ -12,6 +12,8 @@ import AVFoundation
 import WebRTC
 import WebKit
 
+@objc(WKWebViewRTC)
+@objcMembers
 public class WKWebViewRTC : NSObject {
 	// RTCPeerConnectionFactory single instance.
 	var rtcPeerConnectionFactory: RTCPeerConnectionFactory!
@@ -31,7 +33,7 @@ public class WKWebViewRTC : NSObject {
 	var audioOutputController: iRTCAudioController!
     
     var webView : WKWebView?
-    var contentController: WKUserContentController?
+    var userContentController: WKUserContentController?
     
 
 	// This is just called if <param name="onload" value="true" /> in plugin.xml.
@@ -46,14 +48,14 @@ public class WKWebViewRTC : NSObject {
 		pluginMediaStreamRenderers = [:]
 		queue = DispatchQueue(label: "wkwebview-iosrtc", attributes: [])
 		pluginRTCPeerConnections = [:]
+        userContentController = contentController
 
         setWebView(webview: wkwebview)
-        
         
         if let path = Bundle(for: type(of: self)).path(forResource: "jsWKWebViewRTC", ofType: "js") {
             if let bindingJS = try? String(contentsOfFile: path, encoding: .utf8) {
                 let script = WKUserScript(source: bindingJS, injectionTime: .atDocumentStart, forMainFrameOnly: false)
-                self.contentController?.addUserScript(script)
+                self.userContentController?.addUserScript(script)
             }
         }
 		else {
@@ -75,8 +77,8 @@ public class WKWebViewRTC : NSObject {
 
 		// Create a PluginRTCAudioController instance.
 		self.audioOutputController = iRTCAudioController()
-        contentController?.add(self, name: "WKWebViewRTC")
-        contentController?.add(self, name: "native_console_log")
+        self.userContentController?.add(self, name: "WKWebViewRTC")
+        self.userContentController?.add(self, name: "native_console_log")
 	}
     
     func setWebView(webview:WKWebView?)
@@ -112,7 +114,7 @@ public class WKWebViewRTC : NSObject {
     public func dispose() {
         self.cleanup()
         
-        self.contentController?.removeAllUserScripts()
+        self.userContentController?.removeAllUserScripts()
         self.webView = nil
     }
     
@@ -304,6 +306,11 @@ public class WKWebViewRTC : NSObject {
 
 	@objc(RTCPeerConnection_addIceCandidate:) func RTCPeerConnection_addIceCandidate(_ command: WkWebviewCommand) {
 		NSLog("WKWebViewRTC#RTCPeerConnection_addIceCandidate()")
+        
+        if command.argument(at: 1) == nil {
+            NSLog("iosrtcPlugin#RTCPeerConnection_addIceCandidate() | ERROR: pluginRTCPeerConnection argument is NIL")
+            return;
+        }
 
 		let pcId = command.argument(at: 0) as! Int
 		let candidate = command.argument(at: 1) as! NSDictionary
