@@ -21,7 +21,9 @@ class iMediaStreamRenderer : NSObject, RTCVideoViewDelegate {
 	var elementView: UIView
 	var pluginMediaStream: iMediaStream?
 	
-	var videoView: RTCEAGLVideoView
+	// RTCEAGLVideoView is gone from the official WebRTC binaries: OpenGL ES was
+	// dropped in favour of Metal, and the simulator slice never exported it.
+	var videoView: RTCMTLVideoView
 	var rtcAudioTrack: RTCAudioTrack?
 	var rtcVideoTrack: RTCVideoTrack?
     var pluginVideoTrack: iMediaStreamTrack?
@@ -45,7 +47,7 @@ class iMediaStreamRenderer : NSObject, RTCVideoViewDelegate {
 		
 		// The effective video view in which the the video stream is shown.
 		// It's placed over the elementView.
-		self.videoView = RTCEAGLVideoView()
+		self.videoView = RTCMTLVideoView()
 		self.videoView.isUserInteractionEnabled = false
 
 		self.elementView.isUserInteractionEnabled = false
